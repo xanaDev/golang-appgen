@@ -10,7 +10,7 @@ import (
 // ZipWriter -ZipWriter
 func ZipWriter(appname string, basefolder string,apptype string) {
 	
-	filename := "C:\\Users\\rajesh.deshpande02\\AppData\\Local\\Temp" + "\\" + apptype +".zip"
+	filename := "D:\\zip" + "\\" + appname +".zip"
 	// Get a Buffer to Write To
 	outFile, err := os.Create(filename)
 	if err != nil {
