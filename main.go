@@ -25,10 +25,14 @@ func setupRouter() *gin.Engine {
 		//var app SimpleApp
         //ctx.BindJSON(&app)
 		ctx.Request.ParseForm()
-		for key, value := range ctx.Request.PostForm {
-			fmt.Println(key,value)
-		}
-	//	CreateFiles(app.Appname,app.Apptype)		 
+		apptype := ctx.PostForm("apptype")
+		appname :=  ctx.PostForm("appname")
+		applib :=  ctx.PostForm("lib")
+		depmgmt := ctx.PostForm("dependency-management")
+
+		fmt.Println(depmgmt)
+		CreateFiles(appname,apptype,applib)		 
+		
 		ctx.Header("Content-Description", "File Transfer")
 	//	ctx.Header("Content-Transfer-Encoding", "binary")
 		ctx.Header("Content-Disposition", "attachment; filename=app.zip" )
