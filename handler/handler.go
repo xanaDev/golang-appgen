@@ -118,7 +118,7 @@ func generateOutput(request *GenerateTemplateRequest) (*GenerateTemplateResponse
 		return nil, fmt.Errorf("requested apptype does not exists")
 	}
 	request.Library = strings.ReplaceAll(request.Library,"/",string(os.PathSeparator))
-	fmt.Println(request.Library)
+	
 	if !utils.LibExists(filepath.Join(request.AppType, request.Library)) {
 		return nil, fmt.Errorf("request library does not exists")
 	}
