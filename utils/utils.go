@@ -7,7 +7,7 @@ import(
 	"go-initializer/consts"
 	"path/filepath"
 	"strings"
-	
+	"fmt"
 )
 
 func HasElem(s interface{}, elem interface{}) bool {
@@ -42,6 +42,7 @@ func AppTypeExists( appType string) bool{
 
 //LibExists l
 func LibExists(library string) bool{
+	fmt.Println(string(os.PathSeparator))
 	homeDir := GetWorkingDirNoError()
 	
 	libraryPath := filepath.Join(homeDir ,"template",library ,"codebase")
