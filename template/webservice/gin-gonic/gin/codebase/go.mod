@@ -1,4 +1,4 @@
-module appname
+module {{ .appname }}
 
 go 1.13
 
