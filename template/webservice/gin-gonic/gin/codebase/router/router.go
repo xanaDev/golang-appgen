@@ -1,7 +1,7 @@
 package router
 
 import (
-	"{{ .appname }}/controllers"
+	"codebase/controllers"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	

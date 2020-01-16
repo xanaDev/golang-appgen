@@ -1,7 +1,7 @@
 package main
 
 import (
-	"{{ .appname }}/router"
+	"codebase/router"
 	"github.com/gin-gonic/gin"
 	
 )
