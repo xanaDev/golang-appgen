@@ -1,4 +1,4 @@
-module appname
+module codebase
 
 go 1.13
 
