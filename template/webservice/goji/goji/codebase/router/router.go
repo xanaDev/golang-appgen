@@ -1,28 +1,25 @@
 package router
 
 import (
-//	"codebase/controllers"
-
+	"codebase/controllers"
 	"goji.io"
 	"net/http"
+	"goji.io/pat"
 	
 )
 
+
 // RegisterRoutes creates router and routes requests
 func RegisterRoutes(mux *goji.Mux) {
-	
-	//mux.HandleFunc(pat.Get("/books"), allBooks)
-	//mux.HandleFunc(pat.Get("/books/:isbn"), bookByISBN)
-	//mux.Use(logging)
 
-/*	m.Group("/v1", func(v1 martini.Router) {
-		user := new(controllers.UserController)
-		v1.Post("/user", user.Create)
-		v1.Get("/user/:id", user.Get)
-		v1.Get("/user", user.Find)
-		v1.Put("/user/:id", user.Update)
-		v1.Delete("/user/:id", user.Delete)
-	})*/
-	http.ListenAndServe("localhost:8081", mux)
+	user := new(controllers.UserController)
+
+	mux.HandleFunc(pat.Post("/user"), user.Create)
+	mux.HandleFunc(pat.Get("/user/:id"), user.Get)
+	mux.HandleFunc(pat.Get("/user"), user.Find)
+	mux.HandleFunc(pat.Put("/user/:id"), user.Update)
+	mux.HandleFunc(pat.Delete("/user/:id"), user.Delete)
+
+	http.ListenAndServe("localhost:8000", mux)
 
 }
