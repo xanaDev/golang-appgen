@@ -10,7 +10,7 @@ func (ws *WebServer)RegisterRoute(){
 		
 	   // Ping test
 		ws.server.POST("/simpleapp", handle.GenerateTemplate)
-	
+		ws.server.GET("/liveness",handle.Liveness);
 		// Get user value
 		//ws.server.GET("/user/:name", handle.GetUserValue)
 			
