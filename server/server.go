@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gin-contrib/cors"
+	_"github.com/gin-contrib/cors"
 )
 
 //WebServer struct
