@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"
 )
 
 //WebServer struct
@@ -35,6 +36,7 @@ func Create(cleanup chan int) *WebServer {
 			param.ErrorMessage,
 		)
 	}))
+	server.Use(cors.Default())
 	server.Use(gin.Recovery())
 
 	ginServer := &WebServer{

@@ -73,6 +73,14 @@ func (request *GenerateTemplateRequest) Validate() error {
 	return nil
 }
 
+//Liveness sds
+func Liveness(ctx *gin.Context) {
+
+	ctx.JSON(200, gin.H{"message": "liveness", "active": "true"})
+	ctx.Abort()
+	return
+}
+
 //GenerateTemplate Create a zip file of a template code
 func GenerateTemplate(ctx *gin.Context) {
 
@@ -81,6 +89,7 @@ func GenerateTemplate(ctx *gin.Context) {
 	if err := ctx.ShouldBind(&request); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
+	fmt.Println(request)
 	//TODO: later include this
 	// if err := request.Validate(); err != nil {
 	// 	ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -90,6 +99,7 @@ func GenerateTemplate(ctx *gin.Context) {
 
 	_, err := generateOutput(&request)
 	if err != nil {
+		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	} else {
 		ctx.Header("Content-Description", "File Transfer")
@@ -98,6 +108,7 @@ func GenerateTemplate(ctx *gin.Context) {
 		//TODO: .zip should be made optional
 		ctx.Header("Content-Disposition", "attachment; filename="+request.AppName+".zip")
 		ctx.Header("Content-Type", "application/zip")
+		ctx.Header("File-name", request.AppName+".zip")
 		ctx.File(request.outputZip)
 
 		err = request.Cleanup()
@@ -115,10 +126,11 @@ func generateOutput(request *GenerateTemplateRequest) (*GenerateTemplateResponse
 	request.outputZip = filepath.Join(sourcePath, consts.OUTPUT_ZIP, request.AppName+".zip")
 
 	if !utils.AppTypeExists(request.AppType) {
+
 		return nil, fmt.Errorf("requested apptype does not exists")
 	}
-	request.Library = strings.ReplaceAll(request.Library,"/",string(os.PathSeparator))
-	
+	request.Library = strings.ReplaceAll(request.Library, "/", string(os.PathSeparator))
+
 	if !utils.LibExists(filepath.Join(request.AppType, request.Library)) {
 		return nil, fmt.Errorf("request library does not exists")
 	}
@@ -224,8 +236,7 @@ func createZip(request *GenerateTemplateRequest) error {
 		header.Name = strings.TrimPrefix(path, request.outputFolder)[1:]
 
 		if info.IsDir() {
-			//FIXME: instead of "/" try using go internal function
-			header.Name += "/"
+			header.Name += string(os.PathSeparator)
 		} else {
 			header.Method = zip.Deflate
 		}
