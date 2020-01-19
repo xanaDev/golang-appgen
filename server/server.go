@@ -21,6 +21,9 @@ func Create(cleanup chan int) *WebServer {
 	server := gin.New()
 	// LoggerWithFormatter middleware will write the logs to gin.DefaultWriter
 	// By default gin.DefaultWriter = os.Stdout
+	
+	server.Use(CORSMiddleware())
+	
 	server.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 
 		// your custom format
@@ -36,7 +39,7 @@ func Create(cleanup chan int) *WebServer {
 			param.ErrorMessage,
 		)
 	}))
-	server.Use(cors.Default())
+	
 	server.Use(gin.Recovery())
 
 	ginServer := &WebServer{
@@ -44,6 +47,26 @@ func Create(cleanup chan int) *WebServer {
 		cleanUp: cleanup,
 	}
 	return ginServer
+}
+
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Max-Age", "86400")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, UPDATE")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Origin, Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		c.Writer.Header().Set("Access-Control-Expose-Headers", "Content-Length")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+
+		fmt.Println(c.Request.Method)
+
+		if c.Request.Method == "OPTIONS" {
+			fmt.Println("OPTIONS")
+			c.AbortWithStatus(200)
+		} else {
+			c.Next()
+		}
+	}
 }
 
 func (ws *WebServer)Run(port string){
