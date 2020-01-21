@@ -2,7 +2,7 @@
 
 # Golang Appsgen
 
-A application that generates Golang application code based on user inputs. It generates different types of application like CLI, Web Serverices, Web client etc using librarey of your choice. While generating sample application, it follows proper directory structure and coding best practices. Start using the hosted version of this application running at [golangapps.com](https://golangapps.com).
+A application that generates Golang application code based on user inputs. It generates different types of application like CLI, Web Serverices, Web client etc using librarey of your choice. While generating sample application, it follows proper directory structure and coding best practices. Start using the hosted version of this application running at [golangapps.com](http://golangapps.com).
 
 
 ### Contributing
