@@ -1,38 +1,19 @@
-{{ .appname }}
 
-TODO://link to cli package used
+## About this application
+This is a sample cli application generated using http://golangapps.com.  It contains a sample code for cli application and can be extended with your business logic. The directory structure of this application is created based on industry best practices and recommendations
 
-**use log for logging purpose
-Basic functionalities for a cli tool
+## How to build
+Execute 'go build main.go' command to build this application.
 
---version
---help
--- hello world functionality
+## How to run
+Execute 'go run main.go' command or binary generated using above step to run this application.
 
-os //get all os related details , give flags here
+## Credits
+This application code uses 'urfave/cli' library. You can find more details about this at https://github.com/urfave/cli
 
-can do simple arithmetic operation like add,sub,div,multiply,mod
-
-can open an url in default browser
-
-show all environment variable and respective values in flag you can give -n to show how many or --sort to sort by alphabetical order
-also allow to set env variables
-
-
-
-//golang dependency management should be configurable
-//logging framework should be configurable
-
-
-//go mod vendor
-
-
-to build a cli 
-    make local
-to build a docker image
-    make docker-build
-
-
+## What's next
+Add your own logic/code to this application to create application as per your requirement. You can also generate same application using different library. Please visit http://golangapps.com for more details.
+ 
 
 
 
