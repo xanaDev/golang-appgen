@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"codebase/forms"
-	"codebase/models"
+	"{{ .appname }}/forms"
+	"{{ .appname }}/models"
 	"net/http"
 	"encoding/json"
 	"github.com/go-martini/martini"

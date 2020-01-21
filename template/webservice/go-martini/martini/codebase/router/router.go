@@ -1,7 +1,7 @@
 package router
 
 import (
-	"codebase/controllers"
+	"{{ .appname }}/controllers"
 	"github.com/go-martini/martini"
 	
 )
