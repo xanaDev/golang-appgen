@@ -3,11 +3,10 @@ package main
 
 import(
 	"log"
-	"{{ .appname }}/pkg/cmd"
+	"{{ .appname }}/cmd"
 )
 
 func init(){
-
 	//setting flags for log level
 	log.SetFlags(3)
 }
