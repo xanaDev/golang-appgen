@@ -3,11 +3,11 @@ package consts
 const(
 
 	//AppName represent an appName .
-	AppName = "Batman"
+	AppName = "{{ .appname }}"
 	//Usage description of app
-	Usage =  "A Simple binary cli "
+	Usage =  "A command line application "
 	//Author author
-	Author = "Gophers"
+	Author = "golangapps.com"
 	//Version app version
 	Version = "1.0.0"
 
