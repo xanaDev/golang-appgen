@@ -1,4 +1,4 @@
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/gophers-prop/go-app-initializr/blob/master/LICENSE)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/gophers-prop/golang-appgen/blob/master/LICENSE)
 
 # Golang Appsgen
 
@@ -7,8 +7,11 @@ A application that generates Golang application code based on user inputs. It ge
 
 ### Contributing
 
-Golang Appsgen is an open source project run by volunteers, and contributions are welcome! Check out the [Issues](https://github.com/gophers-prop/go-app-initializr/issues) page to see if your idea for a contribution has already been mentioned, and feel free to raise an issue or submit a pull request.
+Golang Appsgen is an open source project run by volunteers, and contributions are welcome! Check out the [Issues](https://github.com/gophers-prop/golang-aappgen/issues) page to see if your idea for a contribution has already been mentioned, and feel free to raise an issue or submit a pull request.
 
+### Credits
+The Go gopher on the home page was designed by Renée French.
+Credits of all packages used are given in respective application template README.md file. Also these files are part of downloaded output folder.
 
 ### License
 
