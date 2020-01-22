@@ -11,6 +11,7 @@ Golang Appsgen is an open source project run by volunteers, and contributions ar
 
 ### Credits
 The Go gopher on the home page was designed by Renée French.
+
 Credits of all packages used are given in respective application template README.md file. Also these files are part of downloaded output folder.
 
 ### License
