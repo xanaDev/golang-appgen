@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"go-initializer/consts"
 
+	"go-initializer/types"
 	"go-initializer/utils"
 	"io"
 
@@ -25,6 +26,7 @@ type GenerateTemplateRequest struct {
 	AppType             string `form:"apptype" json:"apptype" xml:"apptype"  binding:"required"`
 	Library             string `form:"library" json:"library" xml:"library"  binding:"required"`
 	DependencyManagment string `form:"dependencies" json:"dependencies" xml:"dependencies" `
+	LoggingFramework    string `form:"loggingframework" json:"loggingframework"`
 	requestTime         string
 	outputFolder        string
 	sourceFolder        string
@@ -35,6 +37,16 @@ type GenerateTemplateRequest struct {
 type GenerateTemplateResponse struct {
 	path    string
 	message string
+}
+
+func Test(ctx *gin.Context) {
+	var request GenerateTemplateRequest
+
+	if err := ctx.ShouldBind(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+	fmt.Println(request)
+	
 }
 
 //Cleanup perfoming cleanup activities
@@ -109,12 +121,12 @@ func GenerateTemplate(ctx *gin.Context) {
 		ctx.Header("Content-Disposition", "attachment; filename="+request.AppName+".zip")
 		ctx.Header("Content-Type", "application/zip")
 		ctx.Header("File-name", request.AppName+".zip")
-		ctx.File(request.outputZip)
+		// ctx.File(request.outputZip)
 
-		err = request.Cleanup()
-		if err != nil {
-			fmt.Println(err)
-		}
+		// err = request.Cleanup()
+		// if err != nil {
+		// 	fmt.Println(err)
+		// }
 		fmt.Println("cleanup finished  ")
 	}
 
@@ -142,11 +154,11 @@ func generateOutput(request *GenerateTemplateRequest) (*GenerateTemplateResponse
 		return nil, err
 	}
 
-	err = createZip(request)
+	// err = createZip(request)
 
-	if err != nil {
-		return nil, err
-	}
+	// if err != nil {
+	// 	return nil, err
+	// }
 	response := &GenerateTemplateResponse{
 		path:    request.AppName,
 		message: "Thanks for downloading",
@@ -160,6 +172,12 @@ func createOuputFolder(request *GenerateTemplateRequest) error {
 	if err != nil {
 		fmt.Println(err)
 		return err
+	}
+
+	config := getConfiguration(request)
+
+	if request.LoggingFramework != "" {
+		request.appendLogGoFile()
 	}
 
 	err = filepath.Walk(request.sourceFolder, func(filePath string, info os.FileInfo, err error) error {
@@ -188,9 +206,7 @@ func createOuputFolder(request *GenerateTemplateRequest) error {
 				fmt.Println("create file: ", err)
 				return err
 			}
-			config := map[string]string{
-				"appname": request.AppName,
-			}
+
 			err = t.Execute(f, config)
 			if err != nil {
 				fmt.Println("execute: ", err)
@@ -265,4 +281,24 @@ func createZip(request *GenerateTemplateRequest) error {
 		return err
 	}
 	return nil
+}
+
+func getConfiguration(req *GenerateTemplateRequest) types.Configuration {
+	var res types.Configuration
+	res.AppName = req.AppName
+
+	if req.LoggingFramework != "" {
+		loggingframework, err := readLogJson(req.LoggingFramework)
+		if err != nil {
+			fmt.Println(err)
+			res.Logging = &types.LoggingFramework{}
+		} else {
+			res.Logging = loggingframework
+		}
+	} else {
+		res.Logging = &types.LoggingFramework{}
+	}
+
+	return res
+
 }

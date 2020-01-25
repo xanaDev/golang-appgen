@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 //WebServer struct
@@ -46,9 +46,6 @@ func Create(cleanup chan int) *WebServer {
 	return ginServer
 }
 
-func (ws *WebServer)Run(port string){
+func (ws *WebServer) Run(port string) {
 	ws.server.Run(port)
 }
-
-
-

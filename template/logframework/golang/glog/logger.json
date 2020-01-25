@@ -1,0 +1,13 @@
+{
+    "LIBRARY_NAME": "golang/glog",
+    "IMPORT_PATH" : "github.com/golang/glog",
+    "VERSION" : "v1.0",
+    "MESSAGES"  : {
+        "ERROR" : "glog.Errorf(\"This is an error message \")",
+        "INFO" : "glog.Infof(\"This is an info message\")",
+        "WARN" : "glog.Warningf(\"This is a warning message\")",
+        "FATAL" : "glog.Fatalf(\"This is a fatal message\")",
+        "DEBUG" : ""
+        
+    }
+} 
