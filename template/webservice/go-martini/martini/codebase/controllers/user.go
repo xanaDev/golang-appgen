@@ -1,12 +1,11 @@
 package controllers
 
 import (
-	"codebase/forms"
-	"codebase/models"
-	"github.com/go-martini/martini"
+	"{{ .appname }}/forms"
+	"{{ .appname }}/models"
 	"net/http"
-	"github.com/codegangsta/martini-contrib/render"
-//	"github.com/martini-contrib/binding"
+	"encoding/json"
+	"github.com/go-martini/martini"
 )
 
 var userModel = new(models.UserModel)
@@ -14,75 +13,90 @@ var userModel = new(models.UserModel)
 // UserController : struct for user controller
 type UserController struct{}
 
+
 // Create : function to create user 
-func (user *UserController) Create(data forms.CreateUserCommand, c martini.Context, r render.Render ) {
-	//var data forms.CreateUserCommand
-	
+func (user *UserController) Create(w http.ResponseWriter, r *http.Request)  {
+	var data forms.CreateUserCommand
+	w.Header().Set("Content-Type", "application/json")
+	err := json.NewDecoder(r.Body).Decode(&data)
+
 	if err != nil {
-	//	c.JSON(406, martini.H{"message": "Invalid form", "form": data})
-		r.JSON(500, map[string]interface{}{"status": "error", "message": err.Error()})
-	//	c.Abort()
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	err := userModel.Create(data)
+	err = userModel.Create(data)
 	if err != nil {
-		r.JSON(500, map[string]interface{}{"status": "error", "message": err.Error()})
-		return
+		var errorMsg forms.ResponseMsg
+		errorMsg.Message = "User not created"		
+		json.NewEncoder(w).Encode(errorMsg)
+	}else {
+		var msg forms.ResponseMsg
+		msg.Message = "User created"		
+		json.NewEncoder(w).Encode(msg)
+		
 	}
-
-	c.JSON(200, martini.H{"message": "User created"})
 }
 
 // Get : funcation to get user
-func (user *UserController) Get(c *martini.Context) {
-	id := c.Param("id")
+func (user *UserController) Get(w http.ResponseWriter, r *http.Request,params martini.Params) {
+	id := params["id"]
 	profile, err := userModel.Get(id)
+	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
-		c.JSON(404, gin.H{"message": "User not found", "error": err.Error()})
-		c.Abort()
-	} else {
-		c.JSON(200, gin.H{"data": profile})
+		var errorMsg forms.ResponseMsg
+		errorMsg.Message = "User not found"		
+		json.NewEncoder(w).Encode(errorMsg)
+	} else {		
+		json.NewEncoder(w).Encode(profile)
 	}
 }
 
+
 // Find : List all users
-func (user *UserController) Find(c *martini.Context) {
+func (user *UserController) Find(w http.ResponseWriter, r *http.Request) {
 	list, err := userModel.Find()
+	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
-		c.JSON(404, gin.H{"message": "Find Error", "error": err.Error()})
-		c.Abort()
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	} else {
-		c.JSON(200, gin.H{"data": list})
+		json.NewEncoder(w).Encode(list)
 	}
 }
 
 // Update : Function to update users based on ID
-func (user *UserController) Update(c *martini.Context) {
-	id := c.Param("id")
+func (user *UserController) Update(w http.ResponseWriter, r *http.Request,params martini.Params) {
+	id := params["id"]
 	data := forms.UpdateUserCommand{}
-
-	if c.BindJSON(&data) != nil {
-		c.JSON(406, gin.H{"message": "Invalid Parameters"})
-		c.Abort()
-		return
-	}
-	err := userModel.Update(id, data)
+	err := json.NewDecoder(r.Body).Decode(&data)
+	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
-		c.JSON(406, gin.H{"message": "user count not be updated", "error": err.Error()})
-		c.Abort()
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	c.JSON(200, gin.H{"message": "User updated"})
+	err = userModel.Update(id, data)
+	if err != nil {
+		http.Error(w, "User not updated", http.StatusBadRequest)
+		return
+	} else {
+		var msg forms.ResponseMsg
+		msg.Message = "User Updated"		
+		json.NewEncoder(w).Encode(msg)
+	}
 }
 // Delete : Controller function to delete user based on ID
-func (user *UserController) Delete(c *martini.Context) {
-	id := c.Param("id")
+func (user *UserController) Delete(w http.ResponseWriter, r *http.Request,params martini.Params) {
+	id := params["id"]
+	w.Header().Set("Content-Type", "application/json")
 	err := userModel.Delete(id)
 	if err != nil {
-		c.JSON(406, gin.H{"message": "User could not be deleted", "error": err.Error()})
-		c.Abort()
-		return
+		var errorMsg forms.ResponseMsg
+		errorMsg.Message = "User not found"		
+		json.NewEncoder(w).Encode(errorMsg)
+	}else {
+		var msg forms.ResponseMsg
+		msg.Message = "User deleted"		
+		json.NewEncoder(w).Encode(msg)
 	}
-	c.JSON(200, gin.H{"message": "User deleted"})
 }

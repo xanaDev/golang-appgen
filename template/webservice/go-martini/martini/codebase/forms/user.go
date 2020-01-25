@@ -13,3 +13,8 @@ type UpdateUserCommand struct {
 	ID   string  `json:"id" binding:"required"`
 	Age int `json:"age" binding:"required"`
 }
+
+// ResponseMsg represents response message
+type ResponseMsg struct {
+	Message string `json:"message" binding:"required"`
+}

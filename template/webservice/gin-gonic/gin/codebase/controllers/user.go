@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"codebase/forms"
-	"codebase/models"
+	"{{ .appname }}/forms"
+	"{{ .appname }}/models"
 	"github.com/gin-gonic/gin"
 )
 

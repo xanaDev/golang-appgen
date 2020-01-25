@@ -1,7 +1,7 @@
 package models
 
 import (
-	"codebase/forms"
+	"{{ .appname }}/forms"
 	"fmt"
 )
 
