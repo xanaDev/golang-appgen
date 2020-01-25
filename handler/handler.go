@@ -2,6 +2,7 @@ package handler
 
 import (
 	"archive/zip"
+	"os/exec"
 
 	"fmt"
 	"go-initializer/consts"
@@ -46,7 +47,7 @@ func Test(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 	fmt.Println(request)
-	
+
 }
 
 //Cleanup perfoming cleanup activities
@@ -123,11 +124,11 @@ func GenerateTemplate(ctx *gin.Context) {
 		ctx.Header("File-name", request.AppName+".zip")
 		ctx.File(request.outputZip)
 
-		err = request.Cleanup()
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println("cleanup finished  ")
+			err = request.Cleanup()
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println("cleanup finished  ")
 	}
 
 }
@@ -153,6 +154,14 @@ func generateOutput(request *GenerateTemplateRequest) (*GenerateTemplateResponse
 	if err != nil {
 		return nil, err
 	}
+
+	cmd := exec.Command("bash", "-c", "gofmt -w " + request.AppName+request.requestTime)
+    cmd.Dir = consts.OUTPUT_FOLDER
+    fmt.Println("Running gofmt command and waiting for it to finish...")
+    err = cmd.Run()
+    if err != nil {
+        fmt.Println("Command finished with error:", err)
+    }
 
 	err = createZip(request)
 
@@ -220,6 +229,7 @@ func createOuputFolder(request *GenerateTemplateRequest) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 
 }

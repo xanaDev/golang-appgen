@@ -59,7 +59,7 @@ func initConfig() {
 			os.Exit(1)
 		}
 
-		// Search config in home directory with name ".{{ .appname }}" (without extension).
+		// Search config in home directory with name ".{{ .AppName }}" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigName(".{{ .AppName }}")
 	}
