@@ -2,6 +2,7 @@ package logger
 
 import (
 	"github.com/golang/glog"
+	"flag"
 )
 
 const (
@@ -9,8 +10,9 @@ const (
 )
 
 func init() {
-
+	flag.Parse()
+	glog.Infof("Glog logging framework will be used for loggin purposes . For more info go to https://github.com/golang/glog")
 	glog.Infof("The default glog level is %s ", LOG_LEVEL)
-	glog.V(1).Infof("Starting you application")
+	
 
 }

@@ -1,14 +1,17 @@
 package router
 
 import (
-	"{{ .appname }}/controllers"
+	"{{ .AppName }}/controllers"
 	"github.com/go-martini/martini"
-	
+	{{ if .Logging.ImportPath }}
+	"{{ .Logging.ImportPath }}"
+	{{end}}
 )
 
 // RegisterRoutes creates router and routes requests
 func RegisterRoutes(m *martini.ClassicMartini) {
 	
+	{{ .Logging.Messages.Info }}
 	m.Group("/v1", func(r martini.Router) {
 		user := new(controllers.UserController)
 		r.Post("/user",  user.Create)

@@ -3,7 +3,7 @@ package main
 
 import(
 	"log"
-	"{{ .appname }}/cmd"
+	"{{ .AppName }}/cmd"
 )
 
 func init(){

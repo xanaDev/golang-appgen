@@ -4,12 +4,12 @@ import (
 	"strings"
 	"gopkg.in/alecthomas/kingpin.v2"
 
-	"{{ .appname }}/pkg/echo"
-	"{{ .appname }}/pkg/print"
+	"{{ .AppName }}/pkg/echo"
+	"{{ .AppName }}/pkg/print"
 )
 
 var (
-	app      = kingpin.New("{{ .appname }}", "A command-line application.")
+	app      = kingpin.New("{{ .AppName }}", "A command-line application.")
 
 	printCmd     = app.Command("print", "Print anything to the screen")
 	printMsg  = printCmd.Arg("text", "Text message to print").Strings()

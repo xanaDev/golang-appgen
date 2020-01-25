@@ -1,11 +1,14 @@
 package controllers
 
 import (
-	"{{ .appname }}/forms"
-	"{{ .appname }}/models"
+	"{{ .AppName }}/forms"
+	"{{ .AppName }}/models"
 	"net/http"
 	"encoding/json"
 	"github.com/go-martini/martini"
+	{{ if .Logging.ImportPath }}
+	"{{ .Logging.ImportPath }}"
+	{{end}}
 )
 
 var userModel = new(models.UserModel)
@@ -21,12 +24,14 @@ func (user *UserController) Create(w http.ResponseWriter, r *http.Request)  {
 	err := json.NewDecoder(r.Body).Decode(&data)
 
 	if err != nil {
+		{{ .Logging.Messages.Error }}
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	err = userModel.Create(data)
 	if err != nil {
+		{{ .Logging.Messages.Error }}
 		var errorMsg forms.ResponseMsg
 		errorMsg.Message = "User not created"		
 		json.NewEncoder(w).Encode(errorMsg)
@@ -44,6 +49,7 @@ func (user *UserController) Get(w http.ResponseWriter, r *http.Request,params ma
 	profile, err := userModel.Get(id)
 	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
+		{{ .Logging.Messages.Error }}
 		var errorMsg forms.ResponseMsg
 		errorMsg.Message = "User not found"		
 		json.NewEncoder(w).Encode(errorMsg)
@@ -58,6 +64,7 @@ func (user *UserController) Find(w http.ResponseWriter, r *http.Request) {
 	list, err := userModel.Find()
 	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
+		{{ .Logging.Messages.Error }}
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	} else {
@@ -72,11 +79,13 @@ func (user *UserController) Update(w http.ResponseWriter, r *http.Request,params
 	err := json.NewDecoder(r.Body).Decode(&data)
 	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
+		{{ .Logging.Messages.Error }}
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	err = userModel.Update(id, data)
 	if err != nil {
+		{{ .Logging.Messages.Error }}
 		http.Error(w, "User not updated", http.StatusBadRequest)
 		return
 	} else {
@@ -91,6 +100,7 @@ func (user *UserController) Delete(w http.ResponseWriter, r *http.Request,params
 	w.Header().Set("Content-Type", "application/json")
 	err := userModel.Delete(id)
 	if err != nil {
+		{{ .Logging.Messages.Error }}
 		var errorMsg forms.ResponseMsg
 		errorMsg.Message = "User not found"		
 		json.NewEncoder(w).Encode(errorMsg)

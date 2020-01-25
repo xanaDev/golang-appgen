@@ -3,7 +3,7 @@ package cmd
 
 import (
 	"strings"
-	"{{ .appname }}/pkg/echo"
+	"{{ .AppName }}/pkg/echo"
 	"github.com/spf13/cobra"
 )
 var echoTimes int

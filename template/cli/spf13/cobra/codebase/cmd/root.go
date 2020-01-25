@@ -27,7 +27,7 @@ import (
 var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{Use:   "{{ .appname }}"}
+var rootCmd = &cobra.Command{Use:   "{{ .AppName }}"}
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -61,7 +61,7 @@ func initConfig() {
 
 		// Search config in home directory with name ".{{ .appname }}" (without extension).
 		viper.AddConfigPath(home)
-		viper.SetConfigName(".{{ .appname }}")
+		viper.SetConfigName(".{{ .AppName }}")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match

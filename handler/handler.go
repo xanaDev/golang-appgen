@@ -121,12 +121,12 @@ func GenerateTemplate(ctx *gin.Context) {
 		ctx.Header("Content-Disposition", "attachment; filename="+request.AppName+".zip")
 		ctx.Header("Content-Type", "application/zip")
 		ctx.Header("File-name", request.AppName+".zip")
-		// ctx.File(request.outputZip)
+		ctx.File(request.outputZip)
 
-		// err = request.Cleanup()
-		// if err != nil {
-		// 	fmt.Println(err)
-		// }
+		err = request.Cleanup()
+		if err != nil {
+			fmt.Println(err)
+		}
 		fmt.Println("cleanup finished  ")
 	}
 
@@ -154,11 +154,11 @@ func generateOutput(request *GenerateTemplateRequest) (*GenerateTemplateResponse
 		return nil, err
 	}
 
-	// err = createZip(request)
+	err = createZip(request)
 
-	// if err != nil {
-	// 	return nil, err
-	// }
+	if err != nil {
+		return nil, err
+	}
 	response := &GenerateTemplateResponse{
 		path:    request.AppName,
 		message: "Thanks for downloading",

@@ -1,9 +1,12 @@
 package controllers
 
 import (
-	"{{ .appname }}/forms"
-	"{{ .appname }}/models"
+	"{{ .AppName }}/forms"
+	"{{ .AppName }}/models"
 	"github.com/gin-gonic/gin"
+	{{ if .Logging.ImportPath }}
+	"{{ .Logging.ImportPath }}"
+	{{end}}
 )
 
 var userModel = new(models.UserModel)
@@ -15,6 +18,7 @@ type UserController struct{}
 func (user *UserController) Create(c *gin.Context) {
 	var data forms.CreateUserCommand
 	if c.BindJSON(&data) != nil {
+		{{ .Logging.Messages.Error }}
 		c.JSON(406, gin.H{"message": "Invalid form", "form": data})
 		c.Abort()
 		return
@@ -22,6 +26,7 @@ func (user *UserController) Create(c *gin.Context) {
 
 	err := userModel.Create(data)
 	if err != nil {
+		{{ .Logging.Messages.Error }}
 		c.JSON(406, gin.H{"message": "User could not be created", "error": err.Error()})
 		c.Abort()
 		return
@@ -35,6 +40,7 @@ func (user *UserController) Get(c *gin.Context) {
 	id := c.Param("id")
 	profile, err := userModel.Get(id)
 	if err != nil {
+		{{ .Logging.Messages.Error }}
 		c.JSON(404, gin.H{"message": "User not found", "error": err.Error()})
 		c.Abort()
 	} else {
@@ -46,6 +52,7 @@ func (user *UserController) Get(c *gin.Context) {
 func (user *UserController) Find(c *gin.Context) {
 	list, err := userModel.Find()
 	if err != nil {
+		{{ .Logging.Messages.Error }}
 		c.JSON(404, gin.H{"message": "Find Error", "error": err.Error()})
 		c.Abort()
 	} else {
@@ -59,12 +66,14 @@ func (user *UserController) Update(c *gin.Context) {
 	data := forms.UpdateUserCommand{}
 
 	if c.BindJSON(&data) != nil {
+		{{ .Logging.Messages.Error }}
 		c.JSON(406, gin.H{"message": "Invalid Parameters"})
 		c.Abort()
 		return
 	}
 	err := userModel.Update(id, data)
 	if err != nil {
+		{{ .Logging.Messages.Error }}
 		c.JSON(406, gin.H{"message": "user count not be updated", "error": err.Error()})
 		c.Abort()
 		return
@@ -76,6 +85,7 @@ func (user *UserController) Delete(c *gin.Context) {
 	id := c.Param("id")
 	err := userModel.Delete(id)
 	if err != nil {
+		{{ .Logging.Messages.Error }}
 		c.JSON(406, gin.H{"message": "User could not be deleted", "error": err.Error()})
 		c.Abort()
 		return

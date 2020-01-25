@@ -1,7 +1,7 @@
 package main
 
 import (
-	"{{ .appname }}/cmd"
+	"{{ .AppName }}/cmd"
 	"log"
 )
 

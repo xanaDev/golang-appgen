@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"{{ .appname }}/pkg/echo"
-	"{{ .appname }}/pkg/print"
-	"{{ .appname }}/pkg/consts"
+	"{{ .AppName }}/pkg/echo"
+	"{{ .AppName }}/pkg/print"
+	"{{ .AppName }}/pkg/consts"
 	"github.com/urfave/cli"
 	"os"
 	"log"

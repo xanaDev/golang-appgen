@@ -1,10 +1,13 @@
 package router
 
 import (
-	"codebase/controllers"
+	"{{ .AppName }}/controllers"
 	"goji.io"
 	"net/http"
 	"goji.io/pat"
+	{{ if .Logging.ImportPath }}
+	"{{ .Logging.ImportPath }}"
+	{{end}}
 	
 )
 
@@ -12,6 +15,7 @@ import (
 // RegisterRoutes creates router and routes requests
 func RegisterRoutes(mux *goji.Mux) {
 
+	{{ .Logging.Messages.Info }}
 	user := new(controllers.UserController)
 
 	mux.HandleFunc(pat.Post("/user"), user.Create)

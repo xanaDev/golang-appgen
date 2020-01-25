@@ -1,15 +1,18 @@
 package router
 
 import (
-	"{{ .appname }}/controllers"
+	"{{ .AppName }}/controllers"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	
+	{{ if .Logging.ImportPath }}
+	"{{ .Logging.ImportPath }}"
+	{{end}}
 )
 
 // RegisterRoute creates router and routes requests
 func RegisterRoutes(router *gin.Engine) {
 	
+	{{ .Logging.Messages.Info }}
 
 	v1 := router.Group("/v1")
 	{
