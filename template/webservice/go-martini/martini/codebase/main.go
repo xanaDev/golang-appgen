@@ -1,9 +1,9 @@
 package main
 
 import (
-	"codebase/router"
+	"{{ .appname }}/router"
 	"github.com/go-martini/martini"
-	"codebase/forms"
+	
 	
 )
 
