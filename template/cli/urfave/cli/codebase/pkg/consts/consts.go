@@ -3,7 +3,7 @@ package consts
 const(
 
 	//AppName represent an appName .
-	AppName = "{{ .appname }}"
+	AppName = "{{ .AppName }}"
 	//Usage description of app
 	Usage =  "A command line application "
 	//Author author

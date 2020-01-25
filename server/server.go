@@ -49,6 +49,7 @@ func Create(cleanup chan int) *WebServer {
 	return ginServer
 }
 
+
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
@@ -72,6 +73,3 @@ func CORSMiddleware() gin.HandlerFunc {
 func (ws *WebServer)Run(port string){
 	ws.server.Run(port)
 }
-
-
-

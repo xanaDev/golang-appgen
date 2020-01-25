@@ -1,8 +1,11 @@
 package models
 
 import (
-	"{{ .appname }}/forms"
+	"{{ .AppName }}/forms"
 	"fmt"
+	{{ if .Logging.ImportPath }}
+	"{{ .Logging.ImportPath }}"
+	{{end}}
 )
 
 // User : Struct for getting user data
@@ -17,6 +20,7 @@ type UserModel struct{}
 
 // Create : A model function to create user
 func (m *UserModel) Create(data forms.CreateUserCommand) error {
+	{{ .Logging.Messages.Info }}
 	var err error
 	fmt.Println("User created with below data")
 	fmt.Println("Name : ",data.Name)
@@ -28,12 +32,13 @@ func (m *UserModel) Create(data forms.CreateUserCommand) error {
 
 // Get : Function to retrive user base on id 
 func (m *UserModel) Get(id string) (user User, err error) {
+	{{ .Logging.Messages.Info }}
 	user = User{Name: "user"+id, ID: id, Age: 30}
 	return user, err
 }
 // Find : Function to retrive list of all users
 func (m *UserModel) Find() (list []User, err error) {
-
+	{{ .Logging.Messages.Info }}
 	user1 := User{Name: "user1", ID: "id1", Age: 30}
 	list = append(list,user1)
 	user2 := User{Name: "user2", ID: "id2", Age: 25}
@@ -43,6 +48,7 @@ func (m *UserModel) Find() (list []User, err error) {
 
 // Update : Function to update user details based on id recived from user
 func (m *UserModel) Update(id string, data forms.UpdateUserCommand) (err error) {
+	{{ .Logging.Messages.Info }}
 	// Update logic goes here
 	fmt.Println("User with id "+ id +" is updated with below data")
 	fmt.Println("Name : ",data.Name)
@@ -53,6 +59,7 @@ func (m *UserModel) Update(id string, data forms.UpdateUserCommand) (err error) 
 
 // Delete : Function to delete user based on id
 func (m *UserModel) Delete(id string) (err error) {
+	{{ .Logging.Messages.Info }}
 	fmt.Println("User with id "+ id +" is deleted successfully")
 	err = nil
 	return err

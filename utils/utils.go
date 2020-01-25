@@ -1,39 +1,39 @@
 package utils
 
-import(
-	"reflect"
+import (
+	"fmt"
+	"go-initializer/consts"
 	"io/ioutil"
 	"os"
-	"go-initializer/consts"
 	"path/filepath"
+	"reflect"
 	"strings"
-	"fmt"
 )
 
 func HasElem(s interface{}, elem interface{}) bool {
-    arrV := reflect.ValueOf(s)
+	arrV := reflect.ValueOf(s)
 
-    if arrV.Kind() == reflect.Slice {
-        for i := 0; i < arrV.Len(); i++ {
+	if arrV.Kind() == reflect.Slice {
+		for i := 0; i < arrV.Len(); i++ {
 
-            // XXX - panics if slice element points to an unexported struct field
-            // see https://golang.org/pkg/reflect/#Value.Interface
-            if arrV.Index(i).Interface() == elem {
-                return true
-            }
-        }
-    }
+			// XXX - panics if slice element points to an unexported struct field
+			// see https://golang.org/pkg/reflect/#Value.Interface
+			if arrV.Index(i).Interface() == elem {
+				return true
+			}
+		}
+	}
 
-    return false
+	return false
 }
 
 //AppTypeExists d
-func AppTypeExists( appType string) bool{
+func AppTypeExists(appType string) bool {
 	homeDir := GetWorkingDirNoError()
 
-	appTypes,_ :=	ListDir(homeDir +"/template")
-	for _,appT := range appTypes{
-		if appT == appType{
+	appTypes, _ := ListDir(homeDir + "/template")
+	for _, appT := range appTypes {
+		if appT == appType {
 			return true
 		}
 	}
@@ -41,12 +41,12 @@ func AppTypeExists( appType string) bool{
 }
 
 //LibExists l
-func LibExists(library string) bool{
+func LibExists(library string) bool {
 	fmt.Println(string(os.PathSeparator))
 	homeDir := GetWorkingDirNoError()
-	
-	libraryPath := filepath.Join(homeDir ,"template",library ,"codebase")
-	
+
+	libraryPath := filepath.Join(homeDir, "template", library, "codebase")
+
 	if _, err := os.Stat(libraryPath); os.IsNotExist(err) {
 		// path/to/whatever does not exist
 		return false
@@ -55,66 +55,64 @@ func LibExists(library string) bool{
 
 }
 
-//ListDir will return list of directory inside path depth is 1 
-func ListDir(path string)([]string,error){
-	files,err := ioutil.ReadDir(path)
-	if err != nil{
-		return nil,err
+//ListDir will return list of directory inside path depth is 1
+func ListDir(path string) ([]string, error) {
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return nil, err
 	}
-	var dirName []string 
-	for _,f := range files{
-		if f.IsDir(){
-			dirName = append(dirName,f.Name())	}
+	var dirName []string
+	for _, f := range files {
+		if f.IsDir() {
+			dirName = append(dirName, f.Name())
 		}
-	return dirName,nil
-}
-
-//GetWorkingDir get current working directory
-func GetWorkingDir()(string,error){
-
-	path,err := os.Getwd()
-	if err != nil{
-		return "",err
 	}
-	return path,nil
+	return dirName, nil
 }
 
 //GetWorkingDir get current working directory
-func GetWorkingDirNoError()(string){
+func GetWorkingDir() (string, error) {
 
-	path,_ := os.Getwd()
-	
+	path, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	return path, nil
+}
+
+//GetWorkingDir get current working directory
+func GetWorkingDirNoError() string {
+
+	path, _ := os.Getwd()
+
 	return path
 }
+
 //AddCliLibs add these libs to supported cli libs
-func AddCliLibs(cliNames []string){
+func AddCliLibs(cliNames []string) {
 	consts.SupportedCliLib = cliNames
 }
 
-
 //GetOnlyTemplateCOnfigurableFiles this will list out files who will be configured in template
-func GetOnlyTemplateCOnfigurableFiles(rootPath string)([]string,error){
-	var filePath []string 
-		
-		err := filepath.Walk(rootPath, func(path string, info os.FileInfo, err error) error {
-			if !info.IsDir(){
-				data, err := ioutil.ReadFile(path)
-				if err != nil{
-					return err
-				}
-				//{{ this is the delimitor for template files 
-				//TODO: how to effieciently handle this process
-				if strings.Contains(string(data),"{{"){
-					filePath = append(filePath, path)
-				}
+func GetOnlyTemplateCOnfigurableFiles(rootPath string) ([]string, error) {
+	var filePath []string
+
+	err := filepath.Walk(rootPath, func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			data, err := ioutil.ReadFile(path)
+			if err != nil {
+				return err
 			}
-			return nil
-		})
-		if err != nil {
-			return nil,err
+			//{{ this is the delimitor for template files
+			//TODO: how to effieciently handle this process
+			if strings.Contains(string(data), "{{") {
+				filePath = append(filePath, path)
+			}
 		}
-		return filePath,nil
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return filePath, nil
 }
-
-
-

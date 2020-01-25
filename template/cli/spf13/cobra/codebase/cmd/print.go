@@ -3,7 +3,7 @@ package cmd
 import (
 	"strings"
 	"github.com/spf13/cobra"
-	"{{ .appname }}/pkg/print"
+	"{{ .AppName }}/pkg/print"
 )
 
 // cmdPrint represents the print command
