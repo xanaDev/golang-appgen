@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"archive/tar"
 	"archive/zip"
+	"compress/gzip"
 
 	"fmt"
 	"go-initializer/consts"
@@ -27,10 +29,11 @@ type GenerateTemplateRequest struct {
 	Library             string `form:"library" json:"library" xml:"library"  binding:"required"`
 	DependencyManagment string `form:"dependencies" json:"dependencies" xml:"dependencies" `
 	LoggingFramework    string `form:"loggingframework" json:"loggingframework"`
+	OutputFormat        string `form:"outputformat" json:"outputformat"`
 	requestTime         string
 	outputFolder        string
 	sourceFolder        string
-	outputZip           string
+	outputArchive       string
 }
 
 //GenerateTemplateResponse for future use
@@ -39,6 +42,7 @@ type GenerateTemplateResponse struct {
 	message string
 }
 
+// Test : test function ...Must be removed 
 func Test(ctx *gin.Context) {
 	var request GenerateTemplateRequest
 
@@ -46,7 +50,7 @@ func Test(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 	fmt.Println(request)
-	
+
 }
 
 //Cleanup perfoming cleanup activities
@@ -60,9 +64,9 @@ func (request *GenerateTemplateRequest) Cleanup() error {
 	}
 	// removing zip file
 
-	err = os.RemoveAll(request.outputZip)
+	err = os.RemoveAll(request.outputArchive)
 	if err != nil {
-		return fmt.Errorf("Error cleaning up Zip file for %s", request.outputZip)
+		return fmt.Errorf("Error cleaning up Zip file for %s", request.outputArchive)
 	}
 	return nil
 
@@ -109,6 +113,13 @@ func GenerateTemplate(ctx *gin.Context) {
 
 	request.requestTime = fmt.Sprintf("%d", time.Now().Unix())
 
+	if request.OutputFormat == "tar" {
+		ctx.Header("Content-Type", "application/octet-stream")
+	} else {
+		request.OutputFormat = "zip"
+		ctx.Header("Content-Type", "application/zip")
+	}
+
 	_, err := generateOutput(&request)
 	if err != nil {
 		fmt.Println(err)
@@ -117,11 +128,12 @@ func GenerateTemplate(ctx *gin.Context) {
 		ctx.Header("Content-Description", "File Transfer")
 		ctx.Header("Content-Transfer-Encoding", "binary")
 
-		//TODO: .zip should be made optional
-		ctx.Header("Content-Disposition", "attachment; filename="+request.AppName+".zip")
-		ctx.Header("Content-Type", "application/zip")
-		ctx.Header("File-name", request.AppName+".zip")
-		ctx.File(request.outputZip)
+		// zip is default output format . This is to support cli feature
+	
+		ctx.Header("Content-Disposition", "attachment; filename="+request.AppName+"."+request.OutputFormat)
+		
+		ctx.Header("File-name", request.AppName+"."+request.OutputFormat)
+		ctx.File(request.outputArchive)
 
 		err = request.Cleanup()
 		if err != nil {
@@ -135,7 +147,7 @@ func GenerateTemplate(ctx *gin.Context) {
 func generateOutput(request *GenerateTemplateRequest) (*GenerateTemplateResponse, error) {
 	sourcePath, _ := utils.GetWorkingDir()
 	request.outputFolder = filepath.Join(sourcePath, consts.OUTPUT_FOLDER, request.AppName+request.requestTime)
-	request.outputZip = filepath.Join(sourcePath, consts.OUTPUT_ZIP, request.AppName+".zip")
+	request.outputArchive = filepath.Join(sourcePath, consts.OUTPUT_ZIP, request.AppName+"."+request.OutputFormat)
 
 	if !utils.AppTypeExists(request.AppType) {
 
@@ -154,8 +166,20 @@ func generateOutput(request *GenerateTemplateRequest) (*GenerateTemplateResponse
 		return nil, err
 	}
 
-	err = createZip(request)
-
+	/*	cmd := exec.Command("bash", "-c", "gofmt -w "+request.AppName+request.requestTime)
+		cmd.Dir = consts.OUTPUT_FOLDER
+		fmt.Println("Running gofmt command and waiting for it to finish...")
+		err = cmd.Run()
+		if err != nil {
+			fmt.Println("Command finished with error:", err)
+		}
+	*/
+	if request.OutputFormat == "tar" {
+		err = createTar(request)
+	} else {
+		err = createZip(request)
+	}
+	
 	if err != nil {
 		return nil, err
 	}
@@ -220,13 +244,14 @@ func createOuputFolder(request *GenerateTemplateRequest) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 
 }
 
 func createZip(request *GenerateTemplateRequest) error {
 
-	zipfile, err := os.Create(request.outputZip)
+	zipfile, err := os.Create(request.outputArchive)
 	if err != nil {
 		return err
 	}
@@ -279,6 +304,102 @@ func createZip(request *GenerateTemplateRequest) error {
 	})
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+// tarrer walks paths to create tar file tarName
+func createTar(request *GenerateTemplateRequest) (err error) {
+	tarFile, err := os.Create(request.outputArchive)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		err = tarFile.Close()
+	}()
+
+	absTar, err := filepath.Abs(request.outputArchive)
+	if err != nil {
+		return err
+	}
+
+	// enable compression if file ends in .gz
+	tw := tar.NewWriter(tarFile)
+	if strings.HasSuffix(request.outputArchive, ".gz") || strings.HasSuffix(request.outputArchive, ".gzip") {
+		gz := gzip.NewWriter(tarFile)
+		defer gz.Close()
+		tw = tar.NewWriter(gz)
+	}
+	defer tw.Close()
+
+	var paths []string
+	
+	paths = append(paths, request.outputFolder)
+
+	for _, path := range paths {
+		// validate path
+		path = filepath.Clean(path)
+		absPath, err := filepath.Abs(path)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		if absPath == absTar {
+			fmt.Printf("tar file %s cannot be the source\n", request.outputArchive)
+			continue
+		}
+		if absPath == filepath.Dir(absTar) {
+			fmt.Printf("tar file %s cannot be in source %s\n", request.outputArchive, absPath)
+			continue
+		}
+
+		walker := func(file string, finfo os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			// fill in header info using func FileInfoHeader
+			hdr, err := tar.FileInfoHeader(finfo, finfo.Name())
+			if err != nil {
+				return err
+			}
+
+			relFilePath := file
+			if filepath.IsAbs(path) {
+				relFilePath, err = filepath.Rel(path, file)
+				if err != nil {
+					return err
+				}
+			}
+			// ensure header has relative file path
+			hdr.Name = relFilePath
+
+			if err := tw.WriteHeader(hdr); err != nil {
+				return err
+			}
+			// if path is a dir, dont continue
+			if finfo.Mode().IsDir() {
+				return nil
+			}
+
+			// add file to tar
+			srcFile, err := os.Open(file)
+			
+			if err != nil {
+				return err
+			}
+			defer srcFile.Close()
+			_, err = io.Copy(tw, srcFile)
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+
+		// build tar
+		if err := filepath.Walk(path, walker); err != nil {
+			fmt.Printf("failed to add %s to tar: %s\n", path, err)
+		}
 	}
 	return nil
 }
