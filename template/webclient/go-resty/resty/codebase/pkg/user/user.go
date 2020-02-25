@@ -1,8 +1,8 @@
 package user
 
 import (
-		"{{ .appname }}/pkg/types"
-		"{{ .appname }}/pkg/client"
+		"{{ .AppName }}/pkg/types"
+		"{{ .AppName }}/pkg/client"
 		"fmt"
 	)
 
