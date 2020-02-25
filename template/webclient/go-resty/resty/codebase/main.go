@@ -1,7 +1,7 @@
 package main
 
 import (
-	"{{ .appname }}/pkg/user"
+	"{{ .AppName }}/pkg/user"
 	"fmt"
 )
 func main() {

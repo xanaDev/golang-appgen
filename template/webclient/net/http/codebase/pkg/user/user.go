@@ -1,7 +1,7 @@
 package user
 
 import (
-		"{{ .appname }}/pkg/types"
+		"{{ .AppName }}/pkg/types"
 		"bytes"
 		"fmt"
 		"io/ioutil"

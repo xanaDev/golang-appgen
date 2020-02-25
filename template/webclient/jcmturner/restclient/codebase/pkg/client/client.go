@@ -1,7 +1,7 @@
 package client
 
 import (
-	"{{ .appname }}/pkg/types"
+	"{{ .AppName }}/pkg/types"
 	"github.com/jcmturner/restclient"
 	"os"
 	"fmt"
