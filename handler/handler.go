@@ -18,8 +18,10 @@ import (
 	"strings"
 	"text/template"
 	"time"
-
+	"os/exec"
+	"io/ioutil"
 	"github.com/gin-gonic/gin"
+
 )
 
 //GenerateTemplateRequest request payload for generate template
@@ -97,6 +99,31 @@ func Liveness(ctx *gin.Context) {
 	return
 }
 
+// GenerateGitHubRepo: creating github repo 
+func GenerateGitHubRepo(ctx *gin.Context) {
+	var request GenerateTemplateRequest
+
+	if err := ctx.ShouldBind(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+	fmt.Println(request)
+	request.requestTime = fmt.Sprintf("%d", time.Now().Unix())
+	_, err := generateOutput(&request)
+
+	createRepo(&request)
+
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	} else {
+		err = request.Cleanup()
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println("cleanup finished  ")
+	}
+
+}
 //GenerateTemplate Create a zip file of a template code
 func GenerateTemplate(ctx *gin.Context) {
 
@@ -121,6 +148,17 @@ func GenerateTemplate(ctx *gin.Context) {
 	}
 
 	_, err := generateOutput(&request)
+
+	if request.OutputFormat == "tar" {
+		err = createTar(&request)
+	} else {
+		err = createZip(&request)
+	}
+	
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	if err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -174,19 +212,10 @@ func generateOutput(request *GenerateTemplateRequest) (*GenerateTemplateResponse
 			fmt.Println("Command finished with error:", err)
 		}
 	*/
-	if request.OutputFormat == "tar" {
-		err = createTar(request)
-	} else {
-		err = createZip(request)
-	}
-	
-	if err != nil {
-		return nil, err
-	}
 	response := &GenerateTemplateResponse{
 		path:    request.AppName,
 		message: "Thanks for downloading",
-	}
+	}	
 	return response, nil
 }
 
@@ -244,11 +273,81 @@ func createOuputFolder(request *GenerateTemplateRequest) error {
 	if err != nil {
 		return err
 	}
-
+		
 	return nil
 
 }
 
+func createRepo(request *GenerateTemplateRequest){
+	repo_name := request.AppName
+	token := os.Getenv("GITHUB_AUTH_TOKEN")	
+	
+	url := "https://api.github.com/orgs/gophers-prop/repos"
+
+	payload := strings.NewReader("{\"name\":\""+repo_name+"\"}")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("authorization", "token "+token)
+	req.Header.Add("content-type", "application/json")
+	req.Header.Add("cache-control", "no-cache")
+	req.Header.Add("postman-token", "e1c5b0b0-a573-98dd-008b-72250586c558")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := ioutil.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+	//fmt.Printf("Successfully created new repo: %v\n", repo.GetName())
+
+	cmd := exec.Command("git", "init", request.outputFolder)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		fmt.Println("Git init err :", err)
+	}
+
+	cmd = exec.Command("git", "add", "*")
+	cmd.Dir = request.outputFolder
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		fmt.Println("Git add err :", err)
+	}
+
+	cmd = exec.Command("git", "commit", "-m", "Initail Commit")
+	cmd.Dir = request.outputFolder
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		fmt.Println("Git commit err :", err)
+	}
+
+	cmd = exec.Command("git", "remote", "add", "origin", "https://github.com/gophers-prop/"+request.AppName)
+	cmd.Dir = request.outputFolder
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		fmt.Println("Git remote add err :", err)
+	}
+
+	cmd = exec.Command("git", "push", "origin", "master")
+	cmd.Dir = request.outputFolder
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		fmt.Println("Git push err :", err)
+	}
+
+}
 func createZip(request *GenerateTemplateRequest) error {
 
 	zipfile, err := os.Create(request.outputArchive)
