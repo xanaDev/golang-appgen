@@ -44,6 +44,55 @@ type GenerateTemplateResponse struct {
 	message string
 }
 
+// GetSupportedLibrariesRequest request payload for the GET /libs API call
+type GetSupportedLibrariesRequest struct {
+	AppType string `form:"apptype" json:"apptype" xml:"apptype" binding:"required"`
+}
+
+// GetSupportedLibraries get supported libraries by AppType
+func GetSupportedLibraries(ctx *gin.Context)  {
+	var request GetSupportedLibrariesRequest
+
+	if	err := ctx.ShouldBind(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.Abort()
+		return
+	}
+
+	if !utils.AppTypeExists(request.AppType) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid AppType!"})
+		ctx.Abort()
+		return
+	}
+
+	// Holds the collection of supported libraries for an AppType
+	var supportedLibs []string
+
+	// Get the path to the AppType base directory, ex. template/cli, template/webservice
+	basePath := filepath.Join(utils.GetTemplateDir(), request.AppType)
+
+	// Walk through the appType base directory and list all subfolders up to codebase
+	err := filepath.Walk(basePath , func (path string, info os.FileInfo, err error) error {
+
+		// If last part of the path is 'codebase' then add the relative path to the collection
+		if info.IsDir() && strings.HasSuffix(path, "codebase") {
+			// filepath.Dir removes 'codebase' from the path before trying to get the relative path
+			relativeLibPath, _ := filepath.Rel(basePath, filepath.Dir(path))
+			supportedLibs = append(supportedLibs, relativeLibPath)
+		}
+
+		return nil
+	})
+
+	if	err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.Abort()
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"libraries": supportedLibs})
+}
+
 // Test : test function ...Must be removed 
 func Test(ctx *gin.Context) {
 	var request GenerateTemplateRequest
