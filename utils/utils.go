@@ -88,6 +88,11 @@ func GetWorkingDirNoError() string {
 	return path
 }
 
+//GetTemplateDir get root template directory
+func GetTemplateDir() string {
+	return filepath.Join(GetWorkingDirNoError(), consts.TemplatePath)
+}
+
 //AddCliLibs add these libs to supported cli libs
 func AddCliLibs(cliNames []string) {
 	consts.SupportedCliLib = cliNames

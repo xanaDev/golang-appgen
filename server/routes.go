@@ -14,6 +14,8 @@ func (ws *WebServer) RegisterRoute() {
 	ws.server.POST("/exploreapp", handle.GenerateGitHubRepo)
 	ws.server.GET("/liveness", handle.Liveness)
 	ws.server.POST("/test", handle.Test)
+	ws.server.GET("/libs", handle.GetSupportedLibraries)
+
 	// Get user value
 	//ws.server.GET("/user/:name", handle.GetUserValue)
 

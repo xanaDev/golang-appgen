@@ -1,6 +1,8 @@
 package consts
 
 const (
+	//TemplatePath the root folder for templates
+	TemplatePath       = "/template"
 	//CliTempatePath path for cli templates
 	CliTempatePath     = "/template/cli"
 	REST_TEMPLATE_PATH = "/template/rest"
