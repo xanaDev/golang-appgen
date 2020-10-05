@@ -330,8 +330,9 @@ func createOuputFolder(request *GenerateTemplateRequest) error {
 func createRepo(request *GenerateTemplateRequest){
 	repo_name := request.AppName
 	token := os.Getenv("GITHUB_AUTH_TOKEN")	
+	org_name := os.Getenv("GITHUB_ORG_NAME")
 	
-	url := "https://api.github.com/orgs/gophers-prop/repos"
+	url := "https://api.github.com/orgs/" + org_name + "/repos"
 
 	payload := strings.NewReader("{\"name\":\""+repo_name+"\"}")
 
@@ -378,7 +379,7 @@ func createRepo(request *GenerateTemplateRequest){
 		fmt.Println("Git commit err :", err)
 	}
 
-	cmd = exec.Command("git", "remote", "add", "origin", "https://github.com/gophers-prop/"+request.AppName)
+	cmd = exec.Command("git", "remote", "add", "origin", "https://github.com/" + org_name + "/" + request.AppName)
 	cmd.Dir = request.outputFolder
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
