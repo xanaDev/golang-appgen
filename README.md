@@ -1,9 +1,24 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/gophers-prop/golang-appgen/blob/master/LICENSE)
 
-# Golang Appsgen
+# Golang AppGen
 
-A application that generates Golang application code based on user inputs. It generates different types of application like CLI, Web Serverices, Web client etc using librarey of your choice. While generating sample application, it follows proper directory structure and coding best practices. Start using the hosted version of this application running at [golangapps.com](http://golangapps.com).
+A Golang AppGen generates Golang application code using packges selected by user. It generates different types of application like CLI, Web Serverices, Web client with recommanded project and folder structure.
 
+### Golang AppGen helps you:
+
+  * To create initial Golang project structure with boilerplate code.
+  * To quick start POC using generated Golang application code
+  * To compare and decide available packges to develope application.
+  * Learn development of different types of Golang applications.
+
+### Start using Golang AppGen:
+
+* Open http://golangapps.com
+* Select Type of application you wanted to generate.
+* Select packges you wanted to use in your application.
+* Enter name of your application.
+* Click on 'Download' button to download application in zip format.
+* Click on 'Explore' button to view generated code using online IDE
 
 ### Contributing
 
