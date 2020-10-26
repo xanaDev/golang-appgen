@@ -12,6 +12,7 @@ func (ws *WebServer) RegisterRoute() {
 	// Ping test
 	ws.server.POST("/simpleapp", handle.GenerateTemplate)
 	ws.server.POST("/exploreapp", handle.GenerateGitHubRepo)
+	ws.server.GET("/appcount", handle.AppCounter)
 	ws.server.GET("/liveness", handle.Liveness)
 	ws.server.POST("/test", handle.Test)
 	ws.server.GET("/libs", handle.GetSupportedLibraries)
