@@ -20,8 +20,6 @@ import (
 	"time"
 	"os/exec"
 	"io/ioutil"
-	"os/exec"
-	"io/ioutil"
 	"github.com/gin-gonic/gin"
 	"encoding/json"
 
@@ -172,9 +170,6 @@ func GenerateGitHubRepo(ctx *gin.Context) {
 	if err := ctx.ShouldBind(&request); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	fmt.Println(request)
-	request.requestTime = fmt.Sprintf("%d", time.Now().Unix())
-	_, err := generateOutput(&request)
 
 	file, _ := ioutil.ReadFile("resources/counter.json")
 	data := Counter{} 
@@ -223,11 +218,7 @@ func GenerateTemplate(ctx *gin.Context) {
 
 	updatedFile, _ := json.Marshal(data)
 	_ = ioutil.WriteFile("resources/counter.json", updatedFile, 0644)
-	
-	fmt.Println(request)
-	request.requestTime = fmt.Sprintf("%d", time.Now().Unix())
-	_, err := generateOutput(&request)
-	
+		
 	request.requestTime = fmt.Sprintf("%d", time.Now().Unix())
 
 	if request.OutputFormat == "tar" {
