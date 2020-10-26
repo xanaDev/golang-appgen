@@ -20,7 +20,10 @@ import (
 	"time"
 	"os/exec"
 	"io/ioutil"
+	"os/exec"
+	"io/ioutil"
 	"github.com/gin-gonic/gin"
+	"encoding/json"
 
 )
 
@@ -47,6 +50,11 @@ type GenerateTemplateResponse struct {
 // GetSupportedLibrariesRequest request payload for the GET /libs API call
 type GetSupportedLibrariesRequest struct {
 	AppType string `form:"apptype" json:"apptype" xml:"apptype" binding:"required"`
+}
+
+//Counter
+type Counter struct {
+	Count int 
 }
 
 // GetSupportedLibraries get supported libraries by AppType
@@ -104,6 +112,15 @@ func Test(ctx *gin.Context) {
 
 }
 
+func AppCounter(ctx *gin.Context){
+	
+	file, _ := ioutil.ReadFile("resources/counter.json")
+ 	data := Counter{} 
+	_ = json.Unmarshal([]byte(file), &data)
+	 res := data
+	ctx.JSON(http.StatusOK, res )
+}
+
 //Cleanup perfoming cleanup activities
 func (request *GenerateTemplateRequest) Cleanup() error {
 
@@ -159,6 +176,18 @@ func GenerateGitHubRepo(ctx *gin.Context) {
 	request.requestTime = fmt.Sprintf("%d", time.Now().Unix())
 	_, err := generateOutput(&request)
 
+	file, _ := ioutil.ReadFile("resources/counter.json")
+	data := Counter{} 
+        _ = json.Unmarshal([]byte(file), &data)
+	data.Count = data.Count + 1
+
+	updatedFile, _ := json.Marshal(data)
+	_ = ioutil.WriteFile("resources/counter.json", updatedFile, 0644)
+	
+	fmt.Println(request)
+	request.requestTime = fmt.Sprintf("%d", time.Now().Unix())
+	_, err := generateOutput(&request)
+	
 	createRepo(&request)
 
 	if err != nil {
@@ -187,6 +216,18 @@ func GenerateTemplate(ctx *gin.Context) {
 	// 	ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	// }
 
+	file, _ := ioutil.ReadFile("resources/counter.json")
+	data := Counter{} 
+        _ = json.Unmarshal([]byte(file), &data)
+	data.Count = data.Count + 1
+
+	updatedFile, _ := json.Marshal(data)
+	_ = ioutil.WriteFile("resources/counter.json", updatedFile, 0644)
+	
+	fmt.Println(request)
+	request.requestTime = fmt.Sprintf("%d", time.Now().Unix())
+	_, err := generateOutput(&request)
+	
 	request.requestTime = fmt.Sprintf("%d", time.Now().Unix())
 
 	if request.OutputFormat == "tar" {
