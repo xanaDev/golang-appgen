@@ -2,18 +2,22 @@ package server
 
 import (
 	_ "fmt"
-	_ "github.com/gin-gonic/gin"
 	handle "go-initializer/handler"
+
+	_ "github.com/gin-gonic/gin"
 )
 
 //RegisterRoute register routes
 func (ws *WebServer) RegisterRoute() {
 
 	// Ping test
-	ws.server.POST("/simpleapp", handle.GenerateTemplate)
-	ws.server.POST("/exploreapp", handle.GenerateGitHubRepo)
+	ws.server.POST("/simple-app", handle.GenerateTemplate)
+	ws.server.POST("/explore-app", handle.GenerateGitHubRepo)
+	ws.server.GET("/app-count", handle.AppCounter)
 	ws.server.GET("/liveness", handle.Liveness)
 	ws.server.POST("/test", handle.Test)
+	ws.server.GET("/libs", handle.GetSupportedLibraries)
+
 	// Get user value
 	//ws.server.GET("/user/:name", handle.GetUserValue)
 

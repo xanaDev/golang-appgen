@@ -12,16 +12,17 @@ import (
 	"go-initializer/utils"
 	"io"
 
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"text/template"
 	"time"
-	"os/exec"
-	"io/ioutil"
-	"github.com/gin-gonic/gin"
 
+	"github.com/gin-gonic/gin"
 )
 
 //GenerateTemplateRequest request payload for generate template
@@ -30,7 +31,7 @@ type GenerateTemplateRequest struct {
 	AppType             string `form:"apptype" json:"apptype" xml:"apptype"  binding:"required"`
 	Library             string `form:"library" json:"library" xml:"library"  binding:"required"`
 	DependencyManagment string `form:"dependencies" json:"dependencies" xml:"dependencies" `
-	LoggingFramework    string `form:"loggingframework" json:"loggingframework"`
+	LoggingFramework    string `form:"loggingframework" json:"loggingFrameWork"`
 	OutputFormat        string `form:"outputformat" json:"outputformat"`
 	requestTime         string
 	outputFolder        string
@@ -44,7 +45,61 @@ type GenerateTemplateResponse struct {
 	message string
 }
 
-// Test : test function ...Must be removed 
+// GetSupportedLibrariesRequest request payload for the GET /libs API call
+type GetSupportedLibrariesRequest struct {
+	AppType string `form:"apptype" json:"apptype" xml:"apptype" binding:"required"`
+}
+
+//Counter
+type Counter struct {
+	Count int
+}
+
+// GetSupportedLibraries get supported libraries by AppType
+func GetSupportedLibraries(ctx *gin.Context) {
+	var request GetSupportedLibrariesRequest
+
+	if err := ctx.ShouldBind(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.Abort()
+		return
+	}
+
+	if !utils.AppTypeExists(request.AppType) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid AppType!"})
+		ctx.Abort()
+		return
+	}
+
+	// Holds the collection of supported libraries for an AppType
+	var supportedLibs []string
+
+	// Get the path to the AppType base directory, ex. template/cli, template/webservice
+	basePath := filepath.Join(utils.GetTemplateDir(), request.AppType)
+
+	// Walk through the appType base directory and list all subfolders up to codebase
+	err := filepath.Walk(basePath, func(path string, info os.FileInfo, err error) error {
+
+		// If last part of the path is 'codebase' then add the relative path to the collection
+		if info.IsDir() && strings.HasSuffix(path, "codebase") {
+			// filepath.Dir removes 'codebase' from the path before trying to get the relative path
+			relativeLibPath, _ := filepath.Rel(basePath, filepath.Dir(path))
+			supportedLibs = append(supportedLibs, relativeLibPath)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.Abort()
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"libraries": supportedLibs})
+}
+
+// Test : test function ...Must be removed
 func Test(ctx *gin.Context) {
 	var request GenerateTemplateRequest
 
@@ -53,6 +108,15 @@ func Test(ctx *gin.Context) {
 	}
 	fmt.Println(request)
 
+}
+
+func AppCounter(ctx *gin.Context) {
+
+	file, _ := ioutil.ReadFile("resources/counter.json")
+	data := Counter{}
+	_ = json.Unmarshal([]byte(file), &data)
+	res := data
+	ctx.JSON(http.StatusOK, res)
 }
 
 //Cleanup perfoming cleanup activities
@@ -99,13 +163,22 @@ func Liveness(ctx *gin.Context) {
 	return
 }
 
-// GenerateGitHubRepo: creating github repo 
+// GenerateGitHubRepo: creating github repo
 func GenerateGitHubRepo(ctx *gin.Context) {
 	var request GenerateTemplateRequest
 
 	if err := ctx.ShouldBind(&request); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
+
+	file, _ := ioutil.ReadFile("resources/counter.json")
+	data := Counter{}
+	_ = json.Unmarshal([]byte(file), &data)
+	data.Count = data.Count + 1
+
+	updatedFile, _ := json.Marshal(data)
+	_ = ioutil.WriteFile("resources/counter.json", updatedFile, 0644)
+
 	fmt.Println(request)
 	request.requestTime = fmt.Sprintf("%d", time.Now().Unix())
 	_, err := generateOutput(&request)
@@ -124,6 +197,7 @@ func GenerateGitHubRepo(ctx *gin.Context) {
 	}
 
 }
+
 //GenerateTemplate Create a zip file of a template code
 func GenerateTemplate(ctx *gin.Context) {
 
@@ -137,6 +211,14 @@ func GenerateTemplate(ctx *gin.Context) {
 	// if err := request.Validate(); err != nil {
 	// 	ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	// }
+
+	file, _ := ioutil.ReadFile("resources/counter.json")
+	data := Counter{}
+	_ = json.Unmarshal([]byte(file), &data)
+	data.Count = data.Count + 1
+
+	updatedFile, _ := json.Marshal(data)
+	_ = ioutil.WriteFile("resources/counter.json", updatedFile, 0644)
 
 	request.requestTime = fmt.Sprintf("%d", time.Now().Unix())
 
@@ -154,7 +236,7 @@ func GenerateTemplate(ctx *gin.Context) {
 	} else {
 		err = createZip(&request)
 	}
-	
+
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -167,9 +249,9 @@ func GenerateTemplate(ctx *gin.Context) {
 		ctx.Header("Content-Transfer-Encoding", "binary")
 
 		// zip is default output format . This is to support cli feature
-	
+
 		ctx.Header("Content-Disposition", "attachment; filename="+request.AppName+"."+request.OutputFormat)
-		
+
 		ctx.Header("File-name", request.AppName+"."+request.OutputFormat)
 		ctx.File(request.outputArchive)
 
@@ -215,7 +297,7 @@ func generateOutput(request *GenerateTemplateRequest) (*GenerateTemplateResponse
 	response := &GenerateTemplateResponse{
 		path:    request.AppName,
 		message: "Thanks for downloading",
-	}	
+	}
 	return response, nil
 }
 
@@ -273,18 +355,19 @@ func createOuputFolder(request *GenerateTemplateRequest) error {
 	if err != nil {
 		return err
 	}
-		
+
 	return nil
 
 }
 
-func createRepo(request *GenerateTemplateRequest){
+func createRepo(request *GenerateTemplateRequest) {
 	repo_name := request.AppName
-	token := os.Getenv("GITHUB_AUTH_TOKEN")	
-	
-	url := "https://api.github.com/orgs/gophers-prop/repos"
+	token := os.Getenv("GITHUB_AUTH_TOKEN")
+	org_name := os.Getenv("GITHUB_ORG_NAME")
 
-	payload := strings.NewReader("{\"name\":\""+repo_name+"\"}")
+	url := "https://api.github.com/orgs/" + org_name + "/repos"
+
+	payload := strings.NewReader("{\"name\":\"" + repo_name + "\"}")
 
 	req, _ := http.NewRequest("POST", url, payload)
 
@@ -329,7 +412,7 @@ func createRepo(request *GenerateTemplateRequest){
 		fmt.Println("Git commit err :", err)
 	}
 
-	cmd = exec.Command("git", "remote", "add", "origin", "https://github.com/gophers-prop/"+request.AppName)
+	cmd = exec.Command("git", "remote", "add", "origin", "https://github.com/"+org_name+"/"+request.AppName)
 	cmd.Dir = request.outputFolder
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -432,7 +515,7 @@ func createTar(request *GenerateTemplateRequest) (err error) {
 	defer tw.Close()
 
 	var paths []string
-	
+
 	paths = append(paths, request.outputFolder)
 
 	for _, path := range paths {
@@ -483,7 +566,7 @@ func createTar(request *GenerateTemplateRequest) (err error) {
 
 			// add file to tar
 			srcFile, err := os.Open(file)
-			
+
 			if err != nil {
 				return err
 			}
